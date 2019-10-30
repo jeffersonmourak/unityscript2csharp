@@ -430,22 +430,8 @@ namespace UnityScript2CSharp
             var csPath = Path.ChangeExtension(scriptPath, ".cs");
             File.WriteAllText(csPath, content);
 
-            var jsMetaFile = scriptPath + ".meta";
-            var csMetaFile = jsMetaFile.Replace(".js.", ".cs.");
 
-            if (File.Exists(csMetaFile))
-                File.Delete(csMetaFile);
-
-            File.Move(jsMetaFile, csMetaFile);
-
-            if (removeOriginalFiles)
-            {
-                File.Delete(scriptPath);
-            }
-            else
-            {
-                File.Move(scriptPath, scriptPath + ".old");
-            }
+            File.Delete(scriptPath);
 
             if (verbose)
                 Console.WriteLine("Finish processing '{0}' {1}", scriptPath, unsupportedCount > 0 ? $": {unsupportedCount} unsupported constructs found." : "");
