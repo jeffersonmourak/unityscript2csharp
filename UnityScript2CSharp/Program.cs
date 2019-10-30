@@ -66,10 +66,10 @@ namespace UnityScript2CSharp
 
                 if (options.Value.DumpScripts)
                 {
-                    DumpScripts("Runtime", runtimeScripts);
-                    DumpScripts("Editor", editorScripts);
-                    DumpScripts("Plugin", pluginScripts);
-                    DumpScripts("Plugin/Editor", pluginEditorScritps);
+                    //DumpScripts("Runtime", runtimeScripts);
+                    DumpScripts("Editor", runtimeScripts);
+                    //DumpScripts("Plugin", pluginScripts);
+                    //DumpScripts("Plugin/Editor", pluginEditorScritps);
                 }
 
                 var converter = new UnityScript2CSharpConverter(options.Value.IgnoreErrors, options.Value.SkipComments, options.Value.ShowOrphanComments, options.Value.Verbose);
@@ -77,10 +77,10 @@ namespace UnityScript2CSharp
                 var referencedSymbols = new List<SymbolInfo>();
                 var errors = new HashSet<CompilerError>(new CompilerErrorComparer());
                 
-                ConvertScripts(AssemblyType.Runtime, runtimeScripts, converter, options.Value, referencedSymbols, errors);
-                ConvertScripts(AssemblyType.Editor, editorScripts, converter, options.Value, referencedSymbols, errors);
-                ConvertScripts(AssemblyType.RuntimePlugins, pluginScripts, converter, options.Value, referencedSymbols, errors);
-                ConvertScripts(AssemblyType.EditorPlugins, pluginEditorScritps, converter, options.Value, referencedSymbols, errors);
+                //ConvertScripts(AssemblyType.Runtime, runtimeScripts, converter, options.Value, referencedSymbols, errors);
+                ConvertScripts(AssemblyType.Editor, runtimeScripts, converter, options.Value, referencedSymbols, errors);
+                //ConvertScripts(AssemblyType.RuntimePlugins, pluginScripts, converter, options.Value, referencedSymbols, errors);
+                //ConvertScripts(AssemblyType.EditorPlugins, pluginEditorScritps, converter, options.Value, referencedSymbols, errors);
 
                 var foundConditionalCompilation = ReportConversionFinished(runtimeScripts.Length + editorScripts.Length + pluginScripts.Length, options.Value, referencedSymbols, errors);
                 return foundConditionalCompilation ? 1 : 0;
