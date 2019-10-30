@@ -44,7 +44,7 @@ namespace UnityScript2CSharp
 
             try
             {
-                options.Value.ProjectPath = Path.GetFullPath(options.Value.ProjectPath);
+                options.Value.InputPath = Path.GetFullPath(options.Value.InputPath);
 
                 // We should ignore scripts in assets/WebGLTemplates
                 var ignoredPathsRegex = new Regex(string.Format("assets{0}{0}webgltemplates{0}{0}", Path.DirectorySeparatorChar), RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -53,7 +53,7 @@ namespace UnityScript2CSharp
                 var pluginsEditorSubFolder = String.Format("{0}Plugins{0}Editor{0}", Path.DirectorySeparatorChar);
                 var pluginSubFolder = String.Format("{0}Plugins{0}", Path.DirectorySeparatorChar);
 
-                var allFiles = Directory.GetFiles(Path.Combine(options.Value.ProjectPath, "Assets"), "*.js", SearchOption.AllDirectories).Where(path => !ignoredPathsRegex.IsMatch(path));
+                var allFiles = Directory.GetFiles(options.Value.InputPath, "*.js", SearchOption.AllDirectories).Where(path => !ignoredPathsRegex.IsMatch(path));
                 var filter = new Regex(string.Format(@"{0}|{1}|{2}", editorSubFolder, pluginSubFolder, pluginsEditorSubFolder).Replace("\\", "\\\\"), RegexOptions.Compiled);
 
                 var runtimeScripts = allFiles.Where(scriptPath => !filter.IsMatch(scriptPath)).Select(scriptPath => new SourceFile { FileName = scriptPath, Contents = File.ReadAllText(scriptPath)}).ToArray();
@@ -197,7 +197,7 @@ namespace UnityScript2CSharp
 
             // For some reason the command line parser is not detecting missing required arguments if we have multiple options
             // marked as required.
-            if (string.IsNullOrWhiteSpace(options.Value.ProjectPath))
+            if (string.IsNullOrWhiteSpace(options.Value.InputPath))
             {
                 Console.WriteLine(HelpText.AutoBuild(options).ToString());
                 return false;
@@ -247,7 +247,7 @@ namespace UnityScript2CSharp
         private static void AppendGameAssemblies(List<string> references, CommandLineArguments options, AssemblyType assemblyType)
         {
             var assemblies = new string[0];
-            var libraryScriptAssembliesFolder = Path.Combine(options.ProjectPath, "Library/ScriptAssemblies");
+            var libraryScriptAssembliesFolder = Path.GetFullPath(options.ScriptAssemblies);
 
             switch (assemblyType)
             {
@@ -344,7 +344,7 @@ namespace UnityScript2CSharp
                     System.Console.WriteLine($"\t{ds}");
             }
 
-            Action<string, string, int> handler = (scriptPath, context, unsupportedCount) => HandleConvertedScript(scriptPath, context, args.RemoveOriginalFiles, args.Verbose, unsupportedCount);
+            Action<string, string, int> handler = (scriptPath, context, unsupportedCount) => HandleConvertedScript(scriptPath, context, args.OutputPath, args.Verbose, unsupportedCount);
             if (args.DryRun)
                 handler = (_, __, ___) => {};
 
@@ -370,7 +370,7 @@ namespace UnityScript2CSharp
             var errorCount = compilerErrors.Count();
 
             Console.WriteLine();
-            Console.WriteLine("Finished converting {0} scripts in '{1}' with {2} error(s).", totalScripts, args.ProjectPath, errorCount);
+            Console.WriteLine("Finished converting {0} scripts in '{1}' with {2} error(s).", totalScripts, args.InputPath, errorCount);
 
             if (errorCount > 0)
             {
@@ -399,7 +399,7 @@ namespace UnityScript2CSharp
             if (!referencedSymbols.Any())
                 return false;
 
-            var projectPathLength = args.ProjectPath.Length;
+            var projectPathLength = args.InputPath.Length;
             using (WithConsoleColors.SetTo(ConsoleColor.Cyan, ConsoleColor.Black))
             {
                 Console.WriteLine();
@@ -425,13 +425,12 @@ namespace UnityScript2CSharp
             return compilerErrors.Any(error => error.Code == internalErrorCode);
         }
 
-        private static void HandleConvertedScript(string scriptPath, string content, bool removeOriginalFiles, bool verbose, int unsupportedCount)
+        private static void HandleConvertedScript(string scriptPath, string content, string outputPath, bool verbose, int unsupportedCount)
         {
-            var csPath = Path.ChangeExtension(scriptPath, ".cs");
+            var filename = Path.Combine(outputPath, Path.GetFileName(scriptPath));
+            var csPath = Path.ChangeExtension(filename, ".cs");
             File.WriteAllText(csPath, content);
 
-
-            File.Delete(scriptPath);
 
             if (verbose)
                 Console.WriteLine("Finish processing '{0}' {1}", scriptPath, unsupportedCount > 0 ? $": {unsupportedCount} unsupported constructs found." : "");

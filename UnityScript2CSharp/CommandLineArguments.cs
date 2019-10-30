@@ -8,8 +8,15 @@ namespace UnityScript2CSharp
         [Option('u', "unityPath", Required = false, HelpText = "Unity installation path. By default the tool will attempt to automatically locate your Unity install.")]
         public string UnityPath { get; set; }
 
-        [Option('p', "projectPath", Required = true, HelpText = "Path of project to be converted.")]
-        public string ProjectPath { get; set; }
+        [Option('I', "inputPath", Required = true, HelpText = "Path of project to be converted.")]
+        public string InputPath { get; set; }
+
+        [Option('O', "outputPath", Required = true, HelpText = "Path of the converted will be written.")]
+        public string OutputPath { get; set; }
+
+        [Option('A', "scriptAssemblies", Required = true, HelpText = "Path of project that has the Script Assemblies.")]
+        public string ScriptAssemblies { get; set; }
+
 
         [Option('r', "references", Min = 0, Max = 100, HelpText = "Assembly references required by the scripts (space separated list).")]
         public IList<string> InternalReferences { get; set; }
